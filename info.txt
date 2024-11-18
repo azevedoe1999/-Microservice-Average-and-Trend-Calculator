@@ -1,0 +1,52 @@
+### User Story 1:
+
+    Track Workout Data
+    As a fitness enthusiast, I want the microservice to track my workout data so that I can monitor my progress and performance.
+
+    Acceptance Criteria
+
+    Functional Requirements
+    • Given a user ID and workout details, when the microservice receives a request to track the workout, then it should store the data in the workout log.
+    • Given a valid user ID and date range, when a user requests to view their workout log, then the microservice should display the workout details within the specified date range.
+
+    Quality Attributes & Non-functional Requirements
+    • Reliability
+    • Given the importance of accurate workout tracking for users, when the microservice is storing workout data, it should ensure data integrity and consistency.
+    • Given a high volume of workout data being tracked, when the microservice is accessed for workout log retrieval, response time should be less than 2 seconds to provide a responsive user experience.
+
+
+### User Story 2:
+
+    Calculate Average Workout Duration
+    As a user, I want the microservice to calculate the average duration of my workouts so that I can evaluate my training intensity over time.
+
+    Acceptance Criteria
+
+    Functional Requirements
+    • Given a user's workout data with start and end times, when the microservice is requested to calculate the average workout duration, then it should provide the average duration of all workouts for that user.
+    • Given valid workout data for a user, when the microservice calculates the average workout duration, then it should account for different types of workouts (e.g., cardio, strength training) and provide separate averages if needed.
+
+    Quality Attributes & Non-functional Requirements
+    • Performance
+    • Given the variance in workout durations and volume of workout data, when the microservice calculates the average workout duration, it should do so efficiently to ensure quick response times for users.
+
+
+### User Story 3:
+
+    Identify Workout Trends
+    As a fitness enthusiast, I want the microservice to identify trends in my workout activities so that I can make data-driven decisions and adjustments to my fitness routine.
+
+    Acceptance Criteria
+
+    Functional Requirements
+    • Given a user's workout data over a period of time, when the microservice is requested to identify workout trends, then it should analyze the data and provide insights into the user's workout patterns and trends (e.g., frequency of workouts, types of exercises preferred).
+    • Given workout trend analysis results, when a user accesses the workout trends feature, then the microservice should present the data in a user-friendly format, such as graphs or charts.
+
+    Quality Attributes & Non-functional Requirements
+    • Scalability
+    • Given the potential growth in user base and workout data, when multiple users access the workout trends feature, the microservice should be able to handle concurrent requests efficiently without any performance degradation.
+
+### THINGS TO TRACK 
+    1. weight lifited 
+    2. reps 
+    3. sets
