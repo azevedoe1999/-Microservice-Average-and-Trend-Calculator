@@ -16,7 +16,13 @@ How to programmatically REQUEST data:
 	
   The first function 'add_workout_to_list()' requires you to send it the data information in this format:
 	
-    data = [{'name' : 'Name of Excersise', 'sets' : [{'rep' : # of reps for set i, 'weight' : weight number used in set i}, {}, ....]}] 
+    data = [
+    {'name' : 'Name of Excersise', 'sets' : [{'rep' : # of reps for set i, 'weight' : weight number used in set i}, {}, ....]
+    },
+    {'name' : 'Name of Excersise', 'sets' : [{'rep' : # of reps for set i, 'weight' : weight number used in set i}, {}, ....]
+    },
+    {}...
+    ] 
 			
   The second and third functions 'calculate_average_weight()' and 'calculate_average_reps()' requires you to send in the name of the excersise that you want to get the results for. 
 	
