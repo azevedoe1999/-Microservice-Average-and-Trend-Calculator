@@ -39,3 +39,11 @@ How to programmatically RECEIVE data:
   Example:
   
      print(response.json())
+
+_______________________________________________________________________________________________________________________________________________________________________________________
+
+UML sequence diagram: 
+
+
+![UML Sequence Diagram](https://github.com/user-attachments/assets/199e20d4-ec49-4208-a37f-96f06f056eb2)
+
