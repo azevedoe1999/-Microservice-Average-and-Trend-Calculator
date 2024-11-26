@@ -48,11 +48,12 @@ def calculate_average_weight():
                     total_sets += 1
                     total_reps += s['reps']
     if name_found:
-        add_average_weight_to_file(name, total_weight, total_reps, total_sets)
+        average_set_weight, average_rep_weight = add_average_weight_to_file(
+            name, total_weight, total_reps, total_sets)
 
         return jsonify(message=f'The average weight per set for {name} is '
-                       + '{average_set_weight}. The average weight per rep '
-                       + 'for {name} is {average_rep_weight}')
+                       + f'{average_set_weight}. The average weight per rep '
+                       + f'for {name} is {average_rep_weight}')
     else:
         return jsonify(message=f'{name} was not found in the current ' +
                        'workout log')
@@ -68,6 +69,8 @@ def add_average_weight_to_file(name, total_weight, total_reps, total_sets):
         file.write(f"Average rep weight for {name} = {average_rep_weight}")
         file.write('\n')
 
+    return round(average_set_weight, 2), round(average_rep_weight, 2)
+
 
 # Calculate the average reps per set and add to file
 @app.route('/calculate_average_reps', methods=['GET'])
@@ -82,9 +85,10 @@ def calculate_average_reps():
                 for s in wo['sets']:
                     total_sets += 1
                     total_reps += s['reps']
+    average_reps = add_average_reps_to_file(name, total_reps, total_sets)
     if name_found:
         return jsonify(message=f'The average reps per set for {name} is ' +
-                       '{average_reps}')
+                       f'{average_reps}')
     else:
         return jsonify(message=f'{name} was not found in the current ' +
                        'workout log')
@@ -96,6 +100,8 @@ def add_average_reps_to_file(name, total_reps, total_sets):
     with open(file_path, 'a') as file:
         file.write(f"Average reps for {name} = {average_reps}")
         file.write('\n')
+
+    return average_reps
 
 
 # Calculate average sets per workout and add to file
@@ -158,14 +164,10 @@ def identify_trends():
     average_reps_trend = calculate_trends(average_reps_data)
     average_sets_trend = calculate_trends(average_sets_data)
 
-    return jsonify('The trend for the average weight per set: ' +
-                   f' {average_set_weight_trend}\n' +
-                   'The trend for the average weight per rep: ' +
-                   f'{average_rep_weight_trend}\n' +
-                   'The trend for the average reps per set: ' +
-                   f'{average_reps_trend}\n ' +
-                   'The trend for the average sets per workout: ' +
-                   f'{average_sets_trend}')
+    return jsonify({'average_weight_per_set': average_set_weight_trend,
+                    'average_weight_per_rep': average_rep_weight_trend,
+                    'average_reps_per_set': average_reps_trend,
+                    'average_sets_per_workout': average_sets_trend})
 
 
 if __name__ == '__main__':
