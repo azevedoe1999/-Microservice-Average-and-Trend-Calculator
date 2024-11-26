@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import json
 import datetime
+import numpy as np
 
 app = Flask(__name__)
 
@@ -8,13 +9,19 @@ workout_log_data = []
 
 file_path = "workout_log.txt"
 
-# NEED TO RUN FIRST, SO THAT WHICH EVERY IS THE CURRENT DATA, WILL BE STORE ON THE TEXT FILE SO THAT THE TREND FUNCTION WILL WORK PROPERLY 
+
+# Need to run first to store the data to be used on the trend function
 @app.route('/add_workout_to_list', methods=['POST'])
 def add_workout_to_list():
     current_datetime = datetime.datetime.now()
     formatted_datetime = current_datetime.strftime("%m-%d-%y %I:%M %p")
     data = request.json
     workout_log_data.append(data)
+    add_workout(formatted_datetime)
+    return jsonify({'message': 'Workouts were added to the file'})
+
+
+def add_workout(formatted_datetime):
     with open(file_path, 'a') as file:
         file.write('\n')
         file.write(f"Log {formatted_datetime}:")
@@ -23,9 +30,9 @@ def add_workout_to_list():
             for wo in workout:
                 json.dump(wo, file)
                 file.write('\n')
-    return jsonify({'message': 'Workouts were added to the file'})
 
-# CALCULATE THE AVERAGE WEIGHT PER SET AND PER REP, AND RETURN THAT INFO, AS WELL AS ADD IT TO THE FILE
+
+# Calculate the average weight per set and per rep, as well as add to file
 @app.route('/calculate_average_weight', methods=['GET'])
 def calculate_average_weight():
     name = request.args.get('name')
@@ -39,20 +46,33 @@ def calculate_average_weight():
                 for s in wo['sets']:
                     total_weight += s['weight']
                     total_sets += 1
-                    total_reps += s['rep']
+                    total_reps += s['reps']
     if name_found:
-        average_set_weight = total_weight / total_sets
-        average_rep_weight = total_weight / total_reps
-        with open(file_path, 'a') as file:
-            file.write(f"Average set weight for {name} = {average_set_weight}")
-            file.write("\n")
-            file.write(f"Average rep weight for {name} = {average_rep_weight}")
-            file.write('\n')
-        return jsonify(message=f'The average weight per set for {name} is {average_set_weight}. The average weight per rep for {name} is {average_rep_weight}')
-    else:
-        return jsonify(message=f'{name} was not found in the current workout log')
+        average_set_weight, average_rep_weight = add_average_weight_to_file(
+            name, total_weight, total_reps, total_sets)
 
-# CALCULATE THE AVERAGE REPS PER SET AND RETURN THAT INFO, AS WELL AS ADD IT TO THE FILE
+        return jsonify(message=f'The average weight per set for {name} is '
+                       + f'{average_set_weight}. The average weight per rep '
+                       + f'for {name} is {average_rep_weight}')
+    else:
+        return jsonify(message=f'{name} was not found in the current ' +
+                       'workout log')
+
+
+def add_average_weight_to_file(name, total_weight, total_reps, total_sets):
+    average_set_weight = total_weight / total_sets
+    average_rep_weight = total_weight / total_reps
+
+    with open(file_path, 'a') as file:
+        file.write(f"Average set weight for {name} = {average_set_weight}")
+        file.write("\n")
+        file.write(f"Average rep weight for {name} = {average_rep_weight}")
+        file.write('\n')
+
+    return round(average_set_weight, 2), round(average_rep_weight, 2)
+
+
+# Calculate the average reps per set and add to file
 @app.route('/calculate_average_reps', methods=['GET'])
 def calculate_average_reps():
     name = request.args.get('name')
@@ -63,18 +83,28 @@ def calculate_average_reps():
             if wo['name'] == name:
                 name_found = True
                 for s in wo['sets']:
-                    total_sets += 1                
-                    total_reps += s['rep']
+                    total_sets += 1
+                    total_reps += s['reps']
+    average_reps = add_average_reps_to_file(name, total_reps, total_sets)
     if name_found:
-        average_reps = total_reps / total_sets
-        with open(file_path, 'a') as file:
-            file.write(f"Average reps for {name} = {average_reps}")
-            file.write('\n')
-        return jsonify(message=f'The average reps per set for {name} is {average_reps}')
+        return jsonify(message=f'The average reps per set for {name} is ' +
+                       f'{average_reps}')
     else:
-        return jsonify(message=f'{name} was not found in the current workout log')
+        return jsonify(message=f'{name} was not found in the current ' +
+                       'workout log')
 
-# CALCULATE THE AVERAGE SETS PER WORKOUT AND RETURN THAT INFO, AS WELL AS ADD IT TO THE FILE
+
+def add_average_reps_to_file(name, total_reps, total_sets):
+    average_reps = total_reps / total_sets
+
+    with open(file_path, 'a') as file:
+        file.write(f"Average reps for {name} = {average_reps}")
+        file.write('\n')
+
+    return average_reps
+
+
+# Calculate average sets per workout and add to file
 @app.route('/calculate_average_sets', methods=['GET'])
 def calculate_average_sets():
     total_sets = 0
@@ -88,16 +118,10 @@ def calculate_average_sets():
         file.write('\n')
     return jsonify(message=f'The average sets per workout is {average_sets}')
 
-# COMPARE ADVERAGES IN THE TEXT FILE AND RETURN THOSE TRENDS
-@app.route('/identify_trends', methods=['GET'])
-def identify_trends():
-    average_set_weight_data = []
-    average_rep_weight_data = []
-    average_reps_data = []
-    average_sets_data = []
 
+def gather_averages(average_set_weight_data, average_rep_weight_data,
+                    average_reps_data, average_sets_data):
     with open(file_path, 'r') as file:
-        # Gather the averages for each section and add it to a set
         for line_number, line in enumerate(file, start=1):
             if 'Average set weight for' in line and '=' in line:
                 key, value = line.split('=')
@@ -111,63 +135,40 @@ def identify_trends():
                 key, value = line.split('=')
                 value = value.strip()
                 average_reps_data.append((float(value)))
-            elif 'Average sets' in line and '=' in line: 
+            elif 'Average sets' in line and '=' in line:
                 key, value = line.split('=')
                 value = value.strip()
                 average_sets_data.append((float(value)))
 
-    # get trends for average weight per set
-    if len(average_set_weight_data) < 2:
-        average_set_weight_trend = "Not enough data to determine a trend for the average weight per set"
-    else:
-        average_set_weight_change = average_set_weight_data[-1] - average_set_weight_data[0]
-        if average_set_weight_change > 0:
-            average_set_weight_trend = "Increased average weight per set"
-        if average_set_weight_change < 0:
-            average_set_weight_trend = "Decreased average weight per set"
-        else:
-            average_set_weight_trend = "Stable average weight per set"
-    
-    # get trends for average weight per rep
-    if len(average_rep_weight_data) < 2:
-        average_rep_weight_trend = "Not enough data to determine a trend for the average weight per rep"
-    else:
-        average_rep_weight_change = average_rep_weight_data[-1] - average_rep_weight_data[0]
-        if average_rep_weight_change > 0:
-            average_rep_weight_trend = "Increased average weight per rep"
-        if average_rep_weight_change < 0:
-            average_rep_weight_trend = "Decreased average weight per rep"
-        else:
-            average_rep_weight_trend = "Stable average weight per rep"
 
-    # get trends for average reps per set
-    if len(average_reps_data) < 2:
-        average_reps_trend = "Not enough data to determine a trend for the average reps per set"
-    else:
-        average_reps_change = average_reps_data[-1] - average_reps_data[0]
-        if average_reps_change > 0:
-            average_reps_trend = "Increased average reps per set"
-        if average_reps_change < 0:
-            average_reps_trend = "Decreased average reps per set"
-        else:
-            average_reps_trend = "Stable average reps per set"
+def calculate_trends(arr):
+    numbers = np.array(arr)
+    diff = np.diff(numbers)
 
-     # get trends for average sets per workout
-    if len(average_sets_data) < 2:
-        average_sets_trend = "Not enough data to determine a trend for the average sets per workout"
-    else:
-        average_sets_change = average_sets_data[-1] - average_sets_data[0]
-        if average_sets_change > 0:
-            average_sets_trend = "Increased average sets per workout"
-        if average_sets_change < 0:
-            average_sets_trend = "Decreased average sets per workout"
-        else:
-            average_sets_trend = "Stable average sets per workout"
-        
-    return jsonify(f'The trend for the average weight per set: {average_set_weight_trend}\n'
-                f'The trend for the average weight per rep: {average_rep_weight_trend}\n'
-                f'The trend for the average reps per set: {average_reps_trend}\n'
-                f'The trend for the average sets per workout: {average_sets_trend}')      
+    return round(np.mean(diff), 2)
+
+
+# Compare averages in the text file and return trends
+@app.route('/identify_trends', methods=['GET'])
+def identify_trends():
+    average_set_weight_data = []
+    average_rep_weight_data = []
+    average_reps_data = []
+    average_sets_data = []
+
+    gather_averages(average_set_weight_data, average_rep_weight_data,
+                    average_reps_data, average_sets_data)
+
+    average_set_weight_trend = calculate_trends(average_set_weight_data)
+    average_rep_weight_trend = calculate_trends(average_rep_weight_data)
+    average_reps_trend = calculate_trends(average_reps_data)
+    average_sets_trend = calculate_trends(average_sets_data)
+
+    return jsonify({'average_weight_per_set': average_set_weight_trend,
+                    'average_weight_per_rep': average_rep_weight_trend,
+                    'average_reps_per_set': average_reps_trend,
+                    'average_sets_per_workout': average_sets_trend})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
