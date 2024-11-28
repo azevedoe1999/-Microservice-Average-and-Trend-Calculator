@@ -30,33 +30,33 @@ def identify_trends():
 
 if __name__ == '__main__':
     data_1 = [
-    {'name': 'Excersise 1',
-        'sets': [{'rep': 15, 'weight': 200}]
+    {'name': 'Exercise 1',
+        'sets': [{'reps': 15, 'weight': 200}]
         },
-    {'name': 'Excersise 2',
-        'sets': [{'rep': 4, 'weight': 150}, {'rep': 10, 'weight': 200}]
+    {'name': 'Exercise 2',
+        'sets': [{'reps': 4, 'weight': 150}, {'reps': 10, 'weight': 200}]
         }
 ]
     data_2 = [
-    {'name': 'Excersise 3',
-        'sets': [{'rep': 13, 'weight': 150}, {'rep': 10, 'weight': 180}]
+    {'name': 'Exercise 3',
+        'sets': [{'reps': 13, 'weight': 150}, {'reps': 10, 'weight': 180}]
         },
-    {'name': 'Excersise 4',
-        'sets': [{'rep': 7, 'weight': 100}, {'rep': 8, 'weight': 120}]
+    {'name': 'Exercise 4',
+        'sets': [{'reps': 7, 'weight': 100}, {'reps': 8, 'weight': 120}]
         }
 ]
     add_workout_to_list(data_1)
-    calculate_average_weight('Excersise 1')
-    calculate_average_weight('Excersise 2')
-    calculate_average_reps('Excersise 1')
-    calculate_average_reps('Excersise 2')
+    calculate_average_weight('Exercise 1')
+    calculate_average_weight('Exercise 2')
+    calculate_average_reps('Exercise 1')
+    calculate_average_reps('Exercise 2')
     calculate_average_sets()
     identify_trends()
 
     add_workout_to_list(data_2)
-    calculate_average_weight('Excersise 3')
-    calculate_average_weight('Excersise 4')
-    calculate_average_reps('Excersise 3')
-    calculate_average_reps('Excersise 4')
+    calculate_average_weight('Exercise 3')
+    calculate_average_weight('Exercise 4')
+    calculate_average_reps('Exercise 3')
+    calculate_average_reps('Exercise 4')
     calculate_average_sets()
     identify_trends()
